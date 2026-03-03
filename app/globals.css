@@ -18,9 +18,9 @@ body {
 }
 
 .chat-shell {
-  backdrop-filter: blur(10px);
-  background: rgb(255 255 255 / 78%);
-  border: 1px solid rgb(0 0 0 / 10%);
+  backdrop-filter: blur(14px) saturate(115%);
+  background: rgb(255 255 255 / 58%);
+  border: 1px solid rgb(255 255 255 / 45%);
   border-radius: 18px;
   box-shadow: 0 20px 80px rgb(0 0 0 / 12%);
   overflow: hidden;
@@ -95,7 +95,7 @@ body {
 .photo-placeholder {
   animation: drift-through 26s ease-in-out infinite alternate;
   border-radius: 14px;
-  opacity: 0.26;
+  opacity: 0.4;
   position: absolute;
   will-change: transform;
 }
@@ -161,7 +161,7 @@ body {
 @media (max-width: 768px) {
   .floating-photo-frame,
   .photo-placeholder {
-    opacity: 0.12;
+    opacity: 0.2;
   }
 
   .photo-hint {
