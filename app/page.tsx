@@ -85,7 +85,9 @@ export default function Home() {
                   width: `${photo.size}px`,
                   animationDelay: photo.delay,
                   animationDuration: photo.duration,
-                  rotate: photo.rotate,
+                  ["--drift-x" as const]: photo.driftX,
+                  ["--drift-y" as const]: photo.driftY,
+                  ["--photo-rotate" as const]: photo.rotate,
                 } as CSSProperties
               }
             >
@@ -113,9 +115,6 @@ export default function Home() {
         <section className="chat-shell w-full max-w-2xl">
           <header className="border-b border-black/10 px-5 py-4">
             <h1 className="text-lg font-semibold">tejk.chat</h1>
-            <p className="text-sm text-zinc-600">
-              Tej-flavored AI assistant. Squash takes included.
-            </p>
           </header>
 
           <div className="chat-log">
@@ -138,7 +137,7 @@ export default function Home() {
             <input
               value={input}
               onChange={(event) => setInput(event.target.value)}
-              placeholder="Say something to Tej-bot..."
+              placeholder="Say something to Tej"
               className="chat-input"
             />
             <button type="submit" className="chat-send" disabled={isLoading}>
