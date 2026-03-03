@@ -75,18 +75,6 @@ export const floatingPhotos: FloatingPhoto[] = [
     driftY: "-7vh",
   },
   {
-    src: "/photos/tej6.jpg",
-    alt: "Tej portrait 6",
-    top: "2%",
-    left: "40%",
-    size: 310,
-    delay: "0.4s",
-    duration: "34s",
-    rotate: "2deg",
-    driftX: "-10vw",
-    driftY: "11vh",
-  },
-  {
     src: "/photos/tej7.jpg",
     alt: "Tej portrait 7",
     top: "54%",
