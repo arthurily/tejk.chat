@@ -93,7 +93,6 @@ body {
 
 .floating-photo-frame,
 .photo-placeholder {
-  animation: drift-through 26s ease-in-out infinite alternate;
   border-radius: 14px;
   opacity: 0.4;
   position: absolute;
@@ -126,36 +125,6 @@ body {
   position: absolute;
   top: 2rem;
   transform: translateX(-50%);
-}
-
-@keyframes drift-through {
-  0% {
-    transform: translate3d(0, 0, 0) rotate(var(--photo-rotate, -2deg));
-  }
-  35% {
-    transform: translate3d(
-        calc(var(--drift-x, 14vw) * 0.55),
-        calc(var(--drift-y, 8vh) * 0.7),
-        0
-      )
-      rotate(calc(var(--photo-rotate, -2deg) + 1.5deg));
-  }
-  70% {
-    transform: translate3d(
-        calc(var(--drift-x, 14vw) * 0.95),
-        calc(var(--drift-y, 8vh) * 0.95),
-        0
-      )
-      rotate(calc(var(--photo-rotate, -2deg) - 1deg));
-  }
-  100% {
-    transform: translate3d(
-        var(--drift-x, 14vw),
-        var(--drift-y, 8vh),
-        0
-      )
-      rotate(calc(var(--photo-rotate, -2deg) + 1deg));
-  }
 }
 
 @media (max-width: 768px) {
