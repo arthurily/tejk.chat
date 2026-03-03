@@ -71,7 +71,7 @@ export default function Home() {
   };
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-[#f2f3ee] text-zinc-900">
+    <div className="relative min-h-screen overflow-hidden text-zinc-900">
       <div className="pointer-events-none absolute inset-0">
         {floatingPhotos.length > 0 ? (
           floatingPhotos.map((photo) => (
