@@ -23,6 +23,8 @@ type PhotoBody = {
   h: number;
   vx: number;
   vy: number;
+  prefVx: number;
+  prefVy: number;
   rotation: number;
   spin: number;
 };
@@ -110,12 +112,14 @@ export default function Home() {
       const y = Math.min(maxY, Math.max(0, seededY));
 
       const fallbackDirection = index % 2 === 0 ? 1 : -1;
-      const vx = signedNumber(photo.driftX, 10 * fallbackDirection) * 7;
-      const vy = signedNumber(photo.driftY, 8 * -fallbackDirection) * 7;
+      const prefVx = signedNumber(photo.driftX, 10 * fallbackDirection) * 4.4;
+      const prefVy = signedNumber(photo.driftY, 8 * -fallbackDirection) * 4.4;
+      const vx = prefVx;
+      const vy = prefVy;
       const rotation = signedNumber(photo.rotate, 0);
-      const spin = (fallbackDirection * 12) / 10;
+      const spin = (fallbackDirection * 8) / 10;
 
-      return { x, y, w, h, vx, vy, rotation, spin };
+      return { x, y, w, h, vx, vy, prefVx, prefVy, rotation, spin };
     });
 
     let rafId = 0;
@@ -136,7 +140,48 @@ export default function Home() {
       const maxWidth = viewportWidth();
       const maxHeight = viewportHeight();
 
-      for (const body of bodies) {
+      const ax = new Array<number>(bodies.length).fill(0);
+      const ay = new Array<number>(bodies.length).fill(0);
+
+      for (let i = 0; i < bodies.length; i += 1) {
+        for (let j = i + 1; j < bodies.length; j += 1) {
+          const a = bodies[i];
+          const b = bodies[j];
+          const acx = a.x + a.w / 2;
+          const acy = a.y + a.h / 2;
+          const bcx = b.x + b.w / 2;
+          const bcy = b.y + b.h / 2;
+          const dx = acx - bcx;
+          const dy = acy - bcy;
+          const distance = Math.hypot(dx, dy) || 1;
+          const minDistance = (a.w + b.w) * 0.42;
+
+          if (distance >= minDistance) continue;
+
+          const nx = dx / distance;
+          const ny = dy / distance;
+          const strength = ((minDistance - distance) / minDistance) * 110;
+          const tangentDirection = (i + j) % 2 === 0 ? 1 : -1;
+          const tx = -ny * tangentDirection;
+          const ty = nx * tangentDirection;
+
+          // Repel strongly when close, plus a mild side force so they slide past each other.
+          ax[i] += nx * strength + tx * strength * 0.45;
+          ay[i] += ny * strength + ty * strength * 0.45;
+          ax[j] -= nx * strength + tx * strength * 0.45;
+          ay[j] -= ny * strength + ty * strength * 0.45;
+        }
+      }
+
+      for (let i = 0; i < bodies.length; i += 1) {
+        const body = bodies[i];
+        body.vx += ax[i] * dt;
+        body.vy += ay[i] * dt;
+        body.vx += (body.prefVx - body.vx) * 0.35 * dt;
+        body.vy += (body.prefVy - body.vy) * 0.35 * dt;
+
+        body.vx *= 0.995;
+        body.vy *= 0.995;
         body.x += body.vx * dt;
         body.y += body.vy * dt;
         body.rotation += body.spin * dt;
@@ -146,61 +191,18 @@ export default function Home() {
 
         if (body.x <= 0) {
           body.x = 0;
-          body.vx = Math.abs(body.vx);
+          body.vx = Math.abs(body.vx) * 0.94;
         } else if (body.x >= right) {
           body.x = right;
-          body.vx = -Math.abs(body.vx);
+          body.vx = -Math.abs(body.vx) * 0.94;
         }
 
         if (body.y <= 0) {
           body.y = 0;
-          body.vy = Math.abs(body.vy);
+          body.vy = Math.abs(body.vy) * 0.94;
         } else if (body.y >= bottom) {
           body.y = bottom;
-          body.vy = -Math.abs(body.vy);
-        }
-      }
-
-      for (let i = 0; i < bodies.length; i += 1) {
-        for (let j = i + 1; j < bodies.length; j += 1) {
-          const a = bodies[i];
-          const b = bodies[j];
-
-          const overlapsX = a.x < b.x + b.w && a.x + a.w > b.x;
-          const overlapsY = a.y < b.y + b.h && a.y + a.h > b.y;
-
-          if (!overlapsX || !overlapsY) continue;
-
-          const overlapX = Math.min(a.x + a.w - b.x, b.x + b.w - a.x);
-          const overlapY = Math.min(a.y + a.h - b.y, b.y + b.h - a.y);
-
-          if (overlapX < overlapY) {
-            const shift = overlapX / 2;
-            if (a.x < b.x) {
-              a.x -= shift;
-              b.x += shift;
-            } else {
-              a.x += shift;
-              b.x -= shift;
-            }
-
-            const nextVxA = b.vx * 0.98;
-            b.vx = a.vx * 0.98;
-            a.vx = nextVxA;
-          } else {
-            const shift = overlapY / 2;
-            if (a.y < b.y) {
-              a.y -= shift;
-              b.y += shift;
-            } else {
-              a.y += shift;
-              b.y -= shift;
-            }
-
-            const nextVyA = b.vy * 0.98;
-            b.vy = a.vy * 0.98;
-            a.vy = nextVyA;
-          }
+          body.vy = -Math.abs(body.vy) * 0.94;
         }
       }
 
