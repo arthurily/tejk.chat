@@ -39,10 +39,18 @@ const signedNumber = (value: string, fallback: number) => {
   return Number.isFinite(parsed) ? parsed : fallback;
 };
 
+const getPhotoScale = (viewportWidth: number) => {
+  if (viewportWidth <= 430) return 0.5;
+  if (viewportWidth <= 640) return 0.6;
+  if (viewportWidth <= 900) return 0.78;
+  return 1;
+};
+
 export default function Home() {
   const [messages, setMessages] = useState<ChatMessage[]>([starterMessage]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [photoScale, setPhotoScale] = useState(1);
   const photoRefs = useRef<Array<HTMLDivElement | null>>([]);
 
   const emptyStateHint = useMemo(
@@ -95,14 +103,22 @@ export default function Home() {
   };
 
   useEffect(() => {
+    const updateScale = () => setPhotoScale(getPhotoScale(window.innerWidth));
+    updateScale();
+    window.addEventListener("resize", updateScale);
+    return () => window.removeEventListener("resize", updateScale);
+  }, []);
+
+  useEffect(() => {
     if (floatingPhotos.length === 0) return;
 
     const viewportWidth = () => window.innerWidth;
     const viewportHeight = () => window.innerHeight;
+    const speedScale = Math.max(0.65, photoScale);
 
     const bodies: PhotoBody[] = floatingPhotos.map((photo, index) => {
-      const w = photo.size;
-      const h = Math.round(photo.size * 1.25);
+      const w = Math.round(photo.size * photoScale);
+      const h = Math.round(photo.size * 1.25 * photoScale);
       const maxX = Math.max(0, viewportWidth() - w);
       const maxY = Math.max(0, viewportHeight() - h);
 
@@ -112,8 +128,10 @@ export default function Home() {
       const y = Math.min(maxY, Math.max(0, seededY));
 
       const fallbackDirection = index % 2 === 0 ? 1 : -1;
-      const prefVx = signedNumber(photo.driftX, 10 * fallbackDirection) * 4.4;
-      const prefVy = signedNumber(photo.driftY, 8 * -fallbackDirection) * 4.4;
+      const prefVx =
+        signedNumber(photo.driftX, 10 * fallbackDirection) * 4.4 * speedScale;
+      const prefVy =
+        signedNumber(photo.driftY, 8 * -fallbackDirection) * 4.4 * speedScale;
       const vx = prefVx;
       const vy = prefVy;
       const rotation = signedNumber(photo.rotate, 0);
@@ -214,7 +232,7 @@ export default function Home() {
     rafId = requestAnimationFrame(step);
 
     return () => cancelAnimationFrame(rafId);
-  }, []);
+  }, [photoScale]);
 
   return (
     <div className="relative min-h-screen overflow-hidden text-zinc-900">
@@ -231,15 +249,15 @@ export default function Home() {
                 {
                   left: "0",
                   top: "0",
-                  width: `${photo.size}px`,
+                  width: `${Math.round(photo.size * photoScale)}px`,
                 } as CSSProperties
               }
             >
               <Image
                 src={photo.src}
                 alt={photo.alt}
-                width={photo.size}
-                height={Math.round(photo.size * 1.25)}
+                width={Math.round(photo.size * photoScale)}
+                height={Math.round(photo.size * 1.25 * photoScale)}
                 className="floating-photo"
               />
             </div>
