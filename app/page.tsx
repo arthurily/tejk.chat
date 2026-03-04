@@ -1,6 +1,13 @@
 "use client";
 
-import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
+import {
+  FormEvent,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import type { CSSProperties } from "react";
 import Image from "next/image";
 import { floatingPhotos } from "./photoConfig";
@@ -52,6 +59,7 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
   const [photoScale, setPhotoScale] = useState(1);
   const photoRefs = useRef<Array<HTMLDivElement | null>>([]);
+  const chatLogRef = useRef<HTMLDivElement | null>(null);
 
   const emptyStateHint = useMemo(
     () =>
@@ -234,6 +242,12 @@ export default function Home() {
     return () => cancelAnimationFrame(rafId);
   }, [photoScale]);
 
+  useLayoutEffect(() => {
+    const node = chatLogRef.current;
+    if (!node) return;
+    node.scrollTop = node.scrollHeight;
+  }, [messages, isLoading]);
+
   return (
     <div className="relative min-h-screen overflow-hidden text-zinc-900">
       <div className="pointer-events-none absolute inset-0">
@@ -279,7 +293,7 @@ export default function Home() {
             <h1 className="text-lg font-semibold">tejk.chat</h1>
           </header>
 
-          <div className="chat-log">
+          <div ref={chatLogRef} className="chat-log">
             {messages.map((message, index) => (
               <div
                 key={`${message.role}-${index}`}
