@@ -361,7 +361,7 @@ export default function Home() {
           ) : (
             <form onSubmit={onUnlock} className="chat-lock">
               <p className="chat-lock-label">
-                Enter password to access Tej chat
+                Enter password to access Tej
               </p>
               <input
                 type="password"
