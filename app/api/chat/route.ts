@@ -71,8 +71,20 @@ type ChatMessage = {
   content: string;
 };
 
+const SITE_ON_HOLD = true;
+
 export async function POST(request: Request) {
   try {
+    if (SITE_ON_HOLD) {
+      return NextResponse.json(
+        {
+          error:
+            "Tej is asleep. This website is currently on hold, and chat is unavailable.",
+        },
+        { status: 503 }
+      );
+    }
+
     const apiKey = process.env.OPENAI_API_KEY;
 
     if (!apiKey) {
