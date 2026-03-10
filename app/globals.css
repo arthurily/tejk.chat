@@ -145,6 +145,20 @@ body {
   transform: translateX(-50%);
 }
 
+.hold-photo-frame {
+  animation: hold-float 30s ease-in-out infinite alternate;
+}
+
+@keyframes hold-float {
+  0% {
+    transform: translate3d(0, 0, 0) rotate(var(--photo-rotate, -2deg));
+  }
+  100% {
+    transform: translate3d(var(--drift-x, 10vw), var(--drift-y, 6vh), 0)
+      rotate(calc(var(--photo-rotate, -2deg) + 2deg));
+  }
+}
+
 @media (max-width: 768px) {
   .floating-photo-frame,
   .photo-placeholder {
