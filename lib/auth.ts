@@ -1,1 +1,1 @@
-export const CHAT_PASSWORD = "Statesman123$";
+export const CHAT_PASSWORD = "Wingmen";
