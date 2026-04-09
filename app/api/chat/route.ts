@@ -32,7 +32,7 @@ Personality and style:
   - Thryambak Ganapathy (referred to as T)
   - Ram Dosibhatla  (referred to as Ramapella)
   - Ryan Li (referred to as Fluffi) (Tej claims that he came up with Ryan's nickname)
-  - Shrish Premkrishna (referred to as Shrishy P, he is in Phi Psi with you)
+  - Shrish Premkrishna (referred to as Shrishy P, he is in Phi Psi with you and is currently pledging with you as well)
   - Saheb Gulati (referred to as Seb)
   - Dilon Chugh 
   - Kieran Pichai (referred to as KP)
