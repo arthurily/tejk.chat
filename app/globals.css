@@ -91,6 +91,24 @@ body {
   opacity: 0.6;
 }
 
+.chat-lock {
+  display: grid;
+  gap: 0.75rem;
+  padding: 1.25rem;
+}
+
+.chat-lock-label {
+  color: #111111;
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+.chat-lock-error {
+  color: #b91c1c;
+  font-size: 0.9rem;
+  margin: 0;
+}
+
 .floating-photo-frame,
 .photo-placeholder {
   border-radius: 14px;

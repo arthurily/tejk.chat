@@ -57,6 +57,11 @@ export default function Home() {
   const [messages, setMessages] = useState<ChatMessage[]>([starterMessage]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [passwordInput, setPasswordInput] = useState("");
+  const [sessionPassword, setSessionPassword] = useState("");
+  const [isUnlocked, setIsUnlocked] = useState(false);
+  const [isCheckingPassword, setIsCheckingPassword] = useState(false);
+  const [passwordError, setPasswordError] = useState("");
   const [photoScale, setPhotoScale] = useState(1);
   const photoRefs = useRef<Array<HTMLDivElement | null>>([]);
   const chatLogRef = useRef<HTMLDivElement | null>(null);
@@ -83,7 +88,10 @@ export default function Home() {
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: nextMessages }),
+        body: JSON.stringify({
+          messages: nextMessages,
+          password: sessionPassword,
+        }),
       });
 
       const data = (await response.json()) as { reply?: string; error?: string };
@@ -107,6 +115,36 @@ export default function Home() {
       ]);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const onUnlock = async (event: FormEvent) => {
+    event.preventDefault();
+    if (isCheckingPassword) return;
+
+    setIsCheckingPassword(true);
+    setPasswordError("");
+
+    try {
+      const response = await fetch("/api/auth/verify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password: passwordInput }),
+      });
+
+      if (!response.ok) {
+        const data = (await response.json()) as { error?: string };
+        setPasswordError(data.error ?? "Wrong password.");
+        return;
+      }
+
+      setSessionPassword(passwordInput);
+      setPasswordInput("");
+      setIsUnlocked(true);
+    } catch {
+      setPasswordError("Could not verify password right now.");
+    } finally {
+      setIsCheckingPassword(false);
     }
   };
 
@@ -292,33 +330,58 @@ export default function Home() {
             <h1 className="text-lg font-semibold">tejk.chat</h1>
           </header>
 
-          <div ref={chatLogRef} className="chat-log">
-            {messages.map((message, index) => (
-              <div
-                key={`${message.role}-${index}`}
-                className={`chat-bubble ${
-                  message.role === "user" ? "chat-bubble-user" : "chat-bubble-ai"
-                }`}
-              >
-                {message.content}
+          {isUnlocked ? (
+            <>
+              <div ref={chatLogRef} className="chat-log">
+                {messages.map((message, index) => (
+                  <div
+                    key={`${message.role}-${index}`}
+                    className={`chat-bubble ${
+                      message.role === "user" ? "chat-bubble-user" : "chat-bubble-ai"
+                    }`}
+                  >
+                    {message.content}
+                  </div>
+                ))}
+                {isLoading ? (
+                  <div className="chat-bubble chat-bubble-ai">Thinking...</div>
+                ) : null}
               </div>
-            ))}
-            {isLoading ? (
-              <div className="chat-bubble chat-bubble-ai">Thinking...</div>
-            ) : null}
-          </div>
 
-          <form onSubmit={onSubmit} className="chat-input-row">
-            <input
-              value={input}
-              onChange={(event) => setInput(event.target.value)}
-              placeholder="Say something to Tej"
-              className="chat-input"
-            />
-            <button type="submit" className="chat-send" disabled={isLoading}>
-              Send
-            </button>
-          </form>
+              <form onSubmit={onSubmit} className="chat-input-row">
+                <input
+                  value={input}
+                  onChange={(event) => setInput(event.target.value)}
+                  placeholder="Say something to Tej"
+                  className="chat-input"
+                />
+                <button type="submit" className="chat-send" disabled={isLoading}>
+                  Send
+                </button>
+              </form>
+            </>
+          ) : (
+            <form onSubmit={onUnlock} className="chat-lock">
+              <p className="chat-lock-label">Enter password to access Tej</p>
+              <input
+                type="password"
+                value={passwordInput}
+                onChange={(event) => setPasswordInput(event.target.value)}
+                className="chat-input"
+                placeholder="Password"
+              />
+              {passwordError ? (
+                <p className="chat-lock-error">{passwordError}</p>
+              ) : null}
+              <button
+                type="submit"
+                className="chat-send"
+                disabled={isCheckingPassword}
+              >
+                {isCheckingPassword ? "Checking..." : "Unlock"}
+              </button>
+            </form>
+          )}
         </section>
       </main>
     </div>

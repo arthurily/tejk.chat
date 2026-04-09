@@ -1,5 +1,6 @@
 import OpenAI from "openai";
 import { NextResponse } from "next/server";
+import { CHAT_PASSWORD } from "@/lib/auth";
 
 const SYSTEM_PROMPT = `
 You are Tej Kosaraju
@@ -85,7 +86,12 @@ export async function POST(request: Request) {
     const client = new OpenAI({ apiKey });
 
     const body = await request.json();
+    const password = body?.password?.trim() ?? "";
     const messages = (body?.messages ?? []) as ChatMessage[];
+
+    if (password !== CHAT_PASSWORD) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
     if (!Array.isArray(messages) || messages.length === 0) {
       return NextResponse.json(
